@@ -91,8 +91,6 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("SurveyId");
 
-                    b.HasIndex("UserId");
-
                     b.ToTable("Surveys");
                 });
 
@@ -119,17 +117,6 @@ namespace Infrastructure.Migrations
                     b.HasKey("UserId");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("ApplicationCore.Models.Survey", b =>
-                {
-                    b.HasOne("ApplicationCore.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

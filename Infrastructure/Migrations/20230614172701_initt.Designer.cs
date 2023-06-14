@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230614165415_init")]
-    partial class init
+    [Migration("20230614172701_initt")]
+    partial class initt
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -94,8 +94,6 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("SurveyId");
 
-                    b.HasIndex("UserId");
-
                     b.ToTable("Surveys");
                 });
 
@@ -122,17 +120,6 @@ namespace Infrastructure.Migrations
                     b.HasKey("UserId");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("ApplicationCore.Models.Survey", b =>
-                {
-                    b.HasOne("ApplicationCore.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }
