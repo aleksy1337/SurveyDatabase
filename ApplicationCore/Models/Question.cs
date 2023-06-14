@@ -13,7 +13,7 @@ namespace ApplicationCore.Models
         [Key]
         public int QuestionId { get; set; }
 
-        [ForeignKey("Survey")]
+        [ForeignKey("SurveyId")]
         [Required]
         public int SurveyId { get; set; }
 

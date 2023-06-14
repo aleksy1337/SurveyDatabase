@@ -14,7 +14,7 @@ namespace ApplicationCore.Models
         [Key]
         public int SurveyId { get; set; }
 
-        [ForeignKey("User")]
+        [ForeignKey("UserId")]
         [Required]
         public int UserId { get; set; }
 
@@ -24,12 +24,12 @@ namespace ApplicationCore.Models
         [Required]
         public SurveyStatus Status { get; set; }
 
-        [ForeignKey("Question")]
-        public Question Question { get; set; }
+        //[ForeignKey("Question")]
+        //public Question Question { get; set; }
 
-        [ForeignKey("Answer")]
-        public Answer Answer { get; set; }
-        public User User { get; set; }
+        //[ForeignKey("Answer")]
+        //public Answer Answer { get; set; }
+        //public User User { get; set; }
     }
 
 }
