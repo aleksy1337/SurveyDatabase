@@ -24,7 +24,12 @@ namespace ApplicationCore.Models
         [Required]
         public SurveyStatus Status { get; set; }
 
-        public virtual User User { get; set; }
+        [ForeignKey("Question")]
+        public Question Question { get; set; }
+
+        [ForeignKey("Answer")]
+        public Answer Answer { get; set; }
+        public User User { get; set; }
     }
 
 }
