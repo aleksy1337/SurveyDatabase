@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace ApplicationCore.Enums
 {
-    internal class SurveyStatus
+    public enum SurveyStatus
     {
+        Public,
+        Private,
+        Domain
     }
 }
