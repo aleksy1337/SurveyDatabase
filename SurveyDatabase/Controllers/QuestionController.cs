@@ -42,7 +42,7 @@ namespace SurveyDatabase.API.Controllers
             return CreatedAtAction(nameof(GetQuestionById), new { id = question.QuestionId }, question);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("update/{id}")]
         public ActionResult UpdateQuestion(int id, [FromBody] Question question)
         {
             if (id != question.QuestionId)
@@ -54,7 +54,7 @@ namespace SurveyDatabase.API.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("delete/{id}")]
         public ActionResult DeleteQuestion(int id)
         {
             _questionService.DeleteQuestion(id);

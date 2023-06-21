@@ -29,7 +29,7 @@ namespace ApplicationCore.Models
 
         //[ForeignKey("Answer")]
         //public Answer Answer { get; set; }
-        //public User User { get; set; }
+
     }
 
 }

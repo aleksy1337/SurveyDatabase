@@ -6,7 +6,11 @@ using System.Threading.Tasks;
 
 namespace ApplicationCore.Enums
 {
-    internal class SurveyOperationType
+    public enum SurveyOperationType
     {
+        Add,
+        Delete,
+        Update,
+        Completing
     }
 }

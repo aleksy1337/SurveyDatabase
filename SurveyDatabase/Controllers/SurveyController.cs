@@ -35,14 +35,14 @@ namespace SurveyDatabase.API.Controllers
             return Ok(survey);
         }
 
-        [HttpPost]
+        [HttpPost("create")]
         public ActionResult<Survey> CreateSurvey([FromBody] SurveyDTO surveyDTO)
         {
             var survey = _surveyService.CreateSurvey(surveyDTO.UserId, surveyDTO.Title, surveyDTO.Status);
             return CreatedAtAction(nameof(GetSurveyById), new { id = survey.SurveyId }, survey);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("update/{id}")]
         public ActionResult UpdateSurvey(int id, [FromBody] Survey survey)
         {
             if (id != survey.SurveyId)
@@ -54,7 +54,7 @@ namespace SurveyDatabase.API.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("delete/{id}")]
         public ActionResult DeleteSurvey(int id)
         {
             _surveyService.DeleteSurvey(id);
