@@ -28,10 +28,7 @@ namespace SurveyDatabase.API.Controllers
         {
             var survey = _surveyService.GetSurveyById(id);
             if (survey == null)
-            {
-                return NotFound();
-            }
-
+                return NotFound("Survey by this Id not found ");
             return Ok(survey);
         }
 
