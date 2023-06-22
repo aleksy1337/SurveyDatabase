@@ -21,10 +21,7 @@ namespace SurveyDatabase.API.Controllers
         {
             var answer = _answerService.GetAnswerById(id);
             if (answer == null)
-            {
-                return NotFound();
-            }
-
+                return NotFound("Answer by this Id not found");
             return Ok(answer);
         }
 
@@ -32,6 +29,8 @@ namespace SurveyDatabase.API.Controllers
         public ActionResult<List<Answer>> GetAnswersByQuestionId(int questionId)
         {
             var answers = _answerService.GetAnswersByQuestionId(questionId);
+            if (answers == null)
+                return NotFound("Answer by this QuestionId not found");
             return Ok(answers);
         }
 
@@ -39,6 +38,8 @@ namespace SurveyDatabase.API.Controllers
         public ActionResult<List<Answer>> GetAnswersBySurveyId(int surveyId)
         {
             var answers = _answerService.GetAnswersBySurveyId(surveyId);
+            if (answers == null)
+                return NotFound("Answer byt this SurveyId not found");
             return Ok(answers);
         }
 
@@ -46,6 +47,8 @@ namespace SurveyDatabase.API.Controllers
         public ActionResult<List<Answer>> GetAnswersByUserId(int userId)
         {
             var answers = _answerService.GetAnswersByUserId(userId);
+            if (answers == null)
+                return NotFound("Anwser by this UserId not found");
             return Ok(answers);
         }
 
@@ -56,5 +59,6 @@ namespace SurveyDatabase.API.Controllers
             return CreatedAtAction(nameof(GetAnswerById), new { id = answer.AnswerId }, answer);
         }
     }
-
 }
+
+

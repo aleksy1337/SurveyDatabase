@@ -21,10 +21,7 @@ namespace SurveyDatabase.API.Controllers
         {
             var question = _questionService.GetQuestionById(id);
             if (question == null)
-            {
-                return NotFound();
-            }
-
+                return NotFound("Question by this Id not found");
             return Ok(question);
         }
 
@@ -32,6 +29,8 @@ namespace SurveyDatabase.API.Controllers
         public ActionResult<List<Question>> GetQuestionsBySurveyId(int surveyId)
         {
             var questions = _questionService.GetQuestionsBySurveyId(surveyId);
+            if (questions == null)
+                return NotFound("Question by this Survey Id not found ");
             return Ok(questions);
         }
 
