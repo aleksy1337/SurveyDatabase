@@ -1,11 +1,11 @@
-﻿using ApplicationCore.Enums;
+﻿using Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure;
 
 namespace SurveyDatabase.API.DTOs
 {
-    public class SurveyDTO
+    public class SurveyDto
     {
-        public int UserId { get; set; }
         public string Title { get; set; }
-        public SurveyStatus Status { get; set; }
+        public string Status { get; set; }
+        public List<QuestionDto> Questions { get; set; }
     }
 }

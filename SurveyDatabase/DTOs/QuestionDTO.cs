@@ -1,9 +1,7 @@
 ﻿namespace SurveyDatabase.API.DTOs
 {
-    public class QuestionDTO
+    public class QuestionDto
     {
-        public int SurveyId { get; set; }
-        public string QuestionText { get; set; }
-        public string QuestionType { get; set; }
+        public string QuestionTitle { get; set; }
     }
 }

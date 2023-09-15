@@ -10,6 +10,6 @@ namespace ApplicationCore.Enums
     {
         Public,
         Private,
-        Domain
+        DomainSpecific
     }
 }

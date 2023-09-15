@@ -1,7 +1,8 @@
 ﻿using ApplicationCore.Models;
-using Infrastructure.Interfaces;
+using ApplicationCore.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using SurveyDatabase.API.DTOs;
+using SurveyDatabase.API.Requests;
 
 namespace SurveyDatabase.API.Controllers
 {
@@ -16,47 +17,74 @@ namespace SurveyDatabase.API.Controllers
             _answerService = answerService;
         }
 
-        [HttpGet("{id}")]
-        public ActionResult<Answer> GetAnswerById(int id)
+        [HttpGet]
+        public ActionResult<SurveyAnswerDto> CreateAnswer([FromBody] SurveyAnswerDto request)
         {
-            var answer = _answerService.GetAnswerById(id);
-            if (answer == null)
-                return NotFound("Answer by this Id not found");
-            return Ok(answer);
+            var questionsAnswers = request.QuestionsAnswersDtos.Select(Mapper.MapFromQuestionAnswerDto).ToList();
+            var answer = _answerService.CreateAnswer(request.SurveyId, questionsAnswers);
+
+            var answerDto = Mapper.MapFromSurveyAnswer(answer);
+
+            return Ok(answerDto);
         }
 
-        [HttpGet("question/{questionId}")]
-        public ActionResult<List<Answer>> GetAnswersByQuestionId(int questionId)
+        [HttpGet]
+        [Route("survey/{SurveyId}")]
+        public ActionResult<List<SurveyAnswerDto>> GetSurveyAnswers([FromRoute] GetSurveyAnswersRequest request)
         {
-            var answers = _answerService.GetAnswersByQuestionId(questionId);
-            if (answers == null)
-                return NotFound("Answer by this QuestionId not found");
-            return Ok(answers);
+            var surveyAnswers = _answerService.GetSurveyAnswers(request.SurveyId);
+
+            if (surveyAnswers == null) 
+            {
+                return BadRequest();
+            }
+
+            var surveyAnswersDtos = surveyAnswers.Select(Mapper.MapFromSurveyAnswer).ToList();
+
+            return Ok(surveyAnswersDtos);
         }
 
-        [HttpGet("survey/{surveyId}")]
-        public ActionResult<List<Answer>> GetAnswersBySurveyId(int surveyId)
+        [HttpGet]
+        [Route("me")]
+        public ActionResult<List<SurveyAnswerDto>> GetMyAnswers()
         {
-            var answers = _answerService.GetAnswersBySurveyId(surveyId);
-            if (answers == null)
-                return NotFound("Answer byt this SurveyId not found");
-            return Ok(answers);
+            var userAnswers = _answerService.GetUserAnswers();
+
+            if (userAnswers == null)
+            {
+                return BadRequest();
+            }
+
+            var userAnswersDtos = userAnswers.Select(Mapper.MapFromSurveyAnswer);
+
+            return Ok(userAnswersDtos);
         }
 
-        [HttpGet("user/{userId}")]
-        public ActionResult<List<Answer>> GetAnswersByUserId(int userId)
+        [HttpGet]
+        [Route("question/{QuestionId}")]
+        public ActionResult<List<QuestionAnswerDto>> GetQuestionAnswers([FromRoute] GetQuestionAnswersRequest request)
         {
-            var answers = _answerService.GetAnswersByUserId(userId);
-            if (answers == null)
-                return NotFound("Anwser by this UserId not found");
-            return Ok(answers);
+            var questionAnswers = _answerService.GetQuestionAnswers(request.QuestionId);
+
+            if (questionAnswers == null)
+            {
+                return BadRequest();
+            }
+
+            var questionAnswersDtos = questionAnswers.Select(Mapper.MapFromQuestionAnswer);
+
+            return Ok(questionAnswersDtos);
         }
 
-        [HttpPost]
-        public ActionResult<Answer> CreateAnswer([FromBody] AnswerDTO answerDTO)
+        [HttpDelete]
+        public ActionResult DeleteAnswer([FromBody] DeleteAnswerRequest deleteAnswerRequest)
         {
-            var answer = _answerService.CreateAnswer(answerDTO.QuestionId, answerDTO.SurveyId, answerDTO.UserId, answerDTO.AnswerText);
-            return CreatedAtAction(nameof(GetAnswerById), new { id = answer.AnswerId }, answer);
+            if (_answerService.DeleteAnswer(deleteAnswerRequest.AnswerId))
+            {
+                return NoContent();
+            }
+
+            return BadRequest();
         }
     }
 }

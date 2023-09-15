@@ -1,57 +1,140 @@
 ﻿using ApplicationCore.Models;
 using Infrastructure.Data;
-using Infrastructure.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ApplicationCore.Interfaces;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services
 {
     public class AnswerService : IAnswerService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AnswerService(ApplicationDbContext context)
+        public AnswerService(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        public Answer CreateAnswer(int questionId, int surveyId, int userId, string answerText)
+        public SurveyAnswer CreateAnswer(int surveyId, List<QuestionAnswer> answers)
         {
-            var answer = new Answer
+            var userId = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (userId == null)
             {
-                QuestionId = questionId,
-                SurveyId = surveyId,
+                return null;
+            }
+
+            var answer = new SurveyAnswer()
+            {
+                Id = surveyId,
                 UserId = userId,
-                AnswerText = answerText
+                QuestionAnswers = answers
             };
 
-            _context.Answers.Add(answer);
+            _context.SurveyAnswers.Add(answer);
             _context.SaveChanges();
 
             return answer;
         }
 
-        public Answer GetAnswerById(int answerId)
+        public bool DeleteAnswer(int surveyAnswerId)
         {
-            return _context.Answers.Find(answerId);
+            var userId = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (userId == null)
+            {
+                return false;
+            }
+
+            var surveyAnswer = _context.SurveyAnswers.Include(x => x.User).FirstOrDefault(x => x.Id == surveyAnswerId);
+
+            if (surveyAnswer == null)
+            {
+                return false;
+            }
+
+            var ownerId = surveyAnswer.User.Id;
+
+            if (userId != ownerId)
+            {
+                return false;
+            }
+
+            _context.Remove(surveyAnswer);
+            _context.SaveChanges();
+
+            return true;
         }
 
-        public List<Answer> GetAnswersByQuestionId(int questionId)
+        public List<QuestionAnswer> GetQuestionAnswers(int questionId)
         {
-            return _context.Answers.Where(a => a.QuestionId == questionId).ToList();
+            var userId = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (userId == null)
+            {
+                return null;
+            }
+
+            var questionAnswer = _context.QuestionAnswers.Include(x => x.SurveyAnswer).ThenInclude(x => x.User).FirstOrDefault(x => x.Id == questionId);
+
+            if (questionAnswer == null)
+            {
+                return null;
+            }
+
+            var ownerId = questionAnswer.SurveyAnswer.User.Id;
+
+            if (userId != ownerId)
+            {
+                return null;
+            }
+
+            var questionAnswers = _context.QuestionAnswers.Where(x => x.Id ==  questionId).ToList();
+            
+            return questionAnswers;
         }
 
-        public List<Answer> GetAnswersBySurveyId(int surveyId)
+        public List<SurveyAnswer> GetSurveyAnswers(int surveyId)
         {
-            return _context.Answers.Where(a => a.SurveyId == surveyId).ToList();
+            var userId = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (userId == null)
+            {
+                return null;
+            }
+
+            var survey = _context.Surveys.Include(x => x.User).FirstOrDefault(x => x.Id == surveyId);
+
+            if (survey == null)
+            {
+                return null;
+            }
+
+            var ownerId = survey.User.Id;
+
+            if (userId != ownerId)
+            {
+                return null;
+            }
+
+            var surveyAnswers = _context.SurveyAnswers.Include(x => x.QuestionAnswers).Where(x => x.SurveyId ==  surveyId).ToList();
+            
+            return surveyAnswers;
         }
 
-        public List<Answer> GetAnswersByUserId(int userId)
+        public List<SurveyAnswer> GetUserAnswers()
         {
-            return _context.Answers.Where(a => a.UserId == userId).ToList();
+            var userId = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (userId == null)
+            {
+                return null;
+            }
+            
+            return _context.SurveyAnswers.Where(x => x.UserId == userId).ToList();
         }
     }
 }

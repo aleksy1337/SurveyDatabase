@@ -1,6 +1,6 @@
-﻿using ApplicationCore.Models;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using SurveyDatabase.API.Requests;
 using System.ComponentModel.DataAnnotations;
 
 namespace SurveyDatabase.API.Controllers
@@ -17,9 +17,9 @@ namespace SurveyDatabase.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login([FromBody] LoginModel model)
+        public async Task<IActionResult> Login([FromBody] LoginRequest model)
         {
-            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, lockoutOnFailure: false);
+            var result = await _signInManager.PasswordSignInAsync(model.Username, model.Password, false, false);
 
             if (result.Succeeded)
             {

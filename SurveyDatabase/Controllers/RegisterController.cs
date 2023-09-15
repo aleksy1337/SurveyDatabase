@@ -1,8 +1,6 @@
-﻿using ApplicationCore.Models;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
-using System.Threading.Tasks;
+using SurveyDatabase.API.Requests;
 
 namespace SurveyDatabase.API.Controllers
 {
@@ -11,16 +9,14 @@ namespace SurveyDatabase.API.Controllers
     public class RegisterController : ControllerBase
     {
         private readonly UserManager<IdentityUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public RegisterController(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
+        public RegisterController(UserManager<IdentityUser> userManager)
         {
             _userManager = userManager;
-            _roleManager = roleManager;
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register([FromBody] RegisterModel model)
+        public async Task<IActionResult> Register([FromBody] RegisterRequest model)
         {
             if (!ModelState.IsValid)
             {
@@ -29,7 +25,7 @@ namespace SurveyDatabase.API.Controllers
 
             var user = new IdentityUser
             {
-                UserName = model.Email,
+                UserName = model.Username,
                 Email = model.Email
             };
 
@@ -37,14 +33,6 @@ namespace SurveyDatabase.API.Controllers
 
             if (result.Succeeded)
             {
-                if (!await _roleManager.RoleExistsAsync(model.Role))
-                {
-                    var role = new IdentityRole(model.Role);
-                    await _roleManager.CreateAsync(role);
-                }
-
-                await _userManager.AddToRoleAsync(user, model.Role);
-
                 return Ok();
             }
 
@@ -52,3 +40,4 @@ namespace SurveyDatabase.API.Controllers
         }
     }
 }
+

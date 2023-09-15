@@ -1,7 +1,8 @@
 ﻿using ApplicationCore.Models;
-using Infrastructure.Interfaces;
+using ApplicationCore.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using SurveyDatabase.API.DTOs;
+using SurveyDatabase.API.Requests;
 
 namespace SurveyDatabase.API.Controllers
 {
@@ -16,45 +17,67 @@ namespace SurveyDatabase.API.Controllers
             _surveyService = surveyService;
         }
 
-        [HttpGet]
-        public ActionResult<List<Survey>> GetAllSurveys()
+        [HttpPost]
+        public ActionResult<SurveyDto> CreateSurvey([FromBody] CreateSurveyRequest request)
         {
-            var surveys = _surveyService.GetAllSurveys();
-            return Ok(surveys);
-        }
+            var questions = request.Questions.Select(Mapper.MapFromQuestionDto).ToList();
+            var survey = _surveyService.CreateSurvey(request.Title, request.Status, questions);
 
-        [HttpGet("{id}")]
-        public ActionResult<Survey> GetSurveyById(int id)
-        {
-            var survey = _surveyService.GetSurveyById(id);
             if (survey == null)
-                return NotFound("Survey by this Id not found ");
-            return Ok(survey);
-        }
-
-        [HttpPost("create")]
-        public ActionResult<Survey> CreateSurvey([FromBody] SurveyDTO surveyDTO)
-        {
-            var survey = _surveyService.CreateSurvey(surveyDTO.UserId, surveyDTO.Title, surveyDTO.Status);
-            return CreatedAtAction(nameof(GetSurveyById), new { id = survey.SurveyId }, survey);
-        }
-
-        [HttpPut("update/{id}")]
-        public ActionResult UpdateSurvey(int id, [FromBody] Survey survey)
-        {
-            if (id != survey.SurveyId)
             {
                 return BadRequest();
             }
 
-            _surveyService.UpdateSurvey(survey);
-            return NoContent();
+            var surveyDto = Mapper.MapFromSurvey(survey);
+
+            return Ok(surveyDto);
         }
 
-        [HttpDelete("delete/{id}")]
-        public ActionResult DeleteSurvey(int id)
+        [HttpGet]
+        [Route("/get/{SurveyId}")]
+        public ActionResult<SurveyDto> GetSurveyById([FromRoute] GetSurveyByIdRequest request)
         {
-            _surveyService.DeleteSurvey(id);
+            var survey = _surveyService.GetSurveyById(request.SurveyId);
+
+            if (survey == null)
+            {
+                return BadRequest();
+            }
+
+            var surveyDto = Mapper.MapFromSurvey(survey);
+
+            return Ok(surveyDto);
+        }
+
+        [HttpGet]
+        [Route("all")]
+        public ActionResult<List<SurveyDto>> GetAllSurveys()
+        {
+            var surveys = _surveyService.GetAllSurveys();
+            var surveysDtos = surveys.Select(Mapper.MapFromSurvey);
+            return Ok(surveysDtos);
+        }
+
+        [HttpGet]
+        [Route("user/{UserId}")]
+        public ActionResult<List<SurveyDto>> GetUserSurveys([FromRoute] GetUserSurveysRequest request)
+        {
+            var surveys = _surveyService.GetUserSurveys(request.UserId);
+
+            if (surveys == null)
+            {
+                return BadRequest();
+            }
+
+            var surveysDtos = surveys.Select(Mapper.MapFromSurvey);
+
+            return Ok(surveysDtos);
+        }
+
+        [HttpDelete]
+        public ActionResult DeleteSurvey(DeleteSurveyRequest request)
+        {
+            _surveyService.DeleteSurvey(request.SurveyId);
             return NoContent();
         }
     }

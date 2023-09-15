@@ -1,4 +1,5 @@
-﻿using ApplicationCore.Models;
+﻿using ApplicationCore.Enums;
+using ApplicationCore.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -11,21 +12,71 @@ namespace Infrastructure.Data
         {
         }
 
-
-        public DbSet<Answer> Answers{ get; set; }
-        public DbSet<Question> Questions { get; set; }
         public DbSet<Survey> Surveys { get; set;}
+        public DbSet<Question> Questions { get; set; }
+        public DbSet<SurveyAnswer> SurveyAnswers { get; set; }
+        public DbSet<QuestionAnswer> QuestionAnswers{ get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            if (!optionsBuilder.IsConfigured)
+
+            builder.Entity<Survey>(builder =>
             {
-                //optionsBuilder.UseSqlServer("Data Source=REIWAI;Initial Catalog=DocumentKeeper;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False");
-                optionsBuilder.UseSqlServer("Data Source=LAPTOP-GJUV1PHO;Initial Catalog=Survey;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False");
+                builder.HasKey(s => s.Id);
+                
+                // https://learn.microsoft.com/en-us/ef/core/modeling/value-conversions?tabs=data-annotations
+                builder.Property(s => s.Status)
+                       .HasConversion(
+                           status => status.ToString(),
+                           status => (SurveyStatus)Enum.Parse(typeof(SurveyStatus), status));
 
-            }
+                builder.HasMany(s => s.Questions)
+                       .WithOne(q => q.Survey);
 
-            base.OnConfiguring(optionsBuilder);
+                builder.HasMany(s => s.SurveyAnswers)
+                       .WithOne(a => a.Survey);
+            });
+
+            builder.Entity<Question>(builder =>
+            {
+                builder.HasKey(q => q.Id);
+
+                builder.HasOne(q => q.Survey)
+                       .WithMany(s => s.Questions);
+
+                builder.HasMany(q => q.QuestionAnswers)
+                       .WithOne(a => a.Question);
+            });
+
+            builder.Entity<SurveyAnswer>(builder =>
+            {
+                builder.HasKey(a => a.Id);
+
+                builder.HasOne(a => a.Survey)
+                       .WithMany(s => s.SurveyAnswers);
+
+                builder.HasOne(a => a.User)
+                       .WithMany(u => u.SurveyAnswers);
+
+                builder.HasMany(a => a.QuestionAnswers)
+                       .WithOne(qa => qa.SurveyAnswer);
+            });
+
+            builder.Entity<QuestionAnswer>(builder =>
+            {
+                builder.HasKey(qa => qa.Id);
+
+                builder.HasOne(qa => qa.Question)
+                       .WithMany(q => q.QuestionAnswers);
+
+                builder.HasOne(qa => qa.SurveyAnswer)
+                       .WithMany(a => a.QuestionAnswers);
+            });
+
+            // https://stackoverflow.com/questions/40703615/the-entity-type-identityuserloginstring-requires-a-primary-key-to-be-defined
+            base.OnModelCreating(builder);
+            builder.Ignore<IdentityUser<string>>();
+            builder.Ignore<User>();
         }
     }
 }
